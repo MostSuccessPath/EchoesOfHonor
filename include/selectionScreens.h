@@ -4,6 +4,7 @@
 #ifndef SELECTIONSCREENS
 #define SELECTIONSCREENS
 
-int menuScreen(SDL_Renderer **renderer);
+void menuScreen(SDL_Renderer *renderer);
+void singlePlayer (SDL_Renderer *renderer);
 
 #endif
