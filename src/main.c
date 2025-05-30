@@ -11,8 +11,8 @@ int main(int argc, char *argv[]) {
 	SDL_Window *window;
 	
 	initSDL(&window, &renderer);
-	
-	menuScreen(&renderer);
+
+	menuScreen(renderer);
 	
 	return 0;
 }
