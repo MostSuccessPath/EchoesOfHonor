@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +19,11 @@ void initSDL(SDL_Window **window, SDL_Renderer **renderer) {
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
     	
         printf("Erro ao iniciar SDL_image: %s\n", IMG_GetError());
+        exit(0);
+    }
+    
+    if (TTF_Init() < 0) {
+        printf("Erro ao iniciar SDL_ttf: %s\n", TTF_GetError());
         exit(0);
     }
     
@@ -41,10 +47,10 @@ void initSDL(SDL_Window **window, SDL_Renderer **renderer) {
     }
 }
 
-tile_t *loadImage(int numImage, char *path, SDL_Renderer *renderer){
+tile_t* loadImage(int numImage, char *path, SDL_Renderer *renderer){
 	
 	int i = 0, j = 0;
-	tile_t *image = malloc (sizeof(tile_t) * numImage);
+	tile_t *image = malloc(sizeof(tile_t) * numImage);
 	char imagePath[100];
 	int pathSize = strlen(path) - 5;
 	
@@ -89,4 +95,25 @@ void defineSize(int numTile, tile_t *tileset, int w, int h) {
 		if (h == 0) tileset[i].image.h = dm.h;
 		else tileset[i].image.h = h; 
 	}
+}
+
+void createText(char *fontPath, int fontSize, int *color, SDL_Renderer *renderer, char *text, tile_t *textTile){
+	
+	TTF_Font* font = TTF_OpenFont(fontPath, fontSize);
+    if (!font) {
+        printf("Erro ao carregar fonte: %s\n", TTF_GetError());
+        exit(0);
+    }
+    
+    SDL_Color fontColor = { color[0], color[1], color[2] };
+    
+	SDL_Surface* surfaceText = TTF_RenderText_Blended(font, text, fontColor);
+    
+	SDL_Texture* textureText = SDL_CreateTextureFromSurface(renderer, surfaceText);
+	
+	textTile->image.w = surfaceText->w;
+	textTile->image.h = surfaceText->h;
+	textTile->texture = textureText;
+	
+    SDL_FreeSurface(surfaceText);
 }

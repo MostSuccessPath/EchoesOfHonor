@@ -4,6 +4,8 @@
 #ifndef SELECTIONSCREENS
 #define SELECTIONSCREENS
 
-int menuScreen(SDL_Renderer **renderer);
+int menuScreen(SDL_Renderer *renderer);
+
+int worldSelection(SDL_Renderer *renderer);
 
 #endif
