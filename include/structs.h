@@ -49,6 +49,15 @@ typedef struct {
 	
 } hero_t;
 
+typedef struct{
+	
+	hero_t hero;
+	int phase;
+	char characterStr[50];
+	int empty;
+	
+}worldSave_t;
+
 typedef struct {
 	
 	image_t image;
