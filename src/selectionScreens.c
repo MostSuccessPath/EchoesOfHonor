@@ -4,7 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include "selectionScreens.h"
+#include "readFiles.h"
 #include "structs.h"
+#include "SDLfunctions.h"
 #include "cJSON.h"
 #include "cJSON_Utils.h"
 
@@ -78,7 +81,7 @@ int menuScreen(SDL_Renderer *renderer) {
 		                
 		            case SDLK_RETURN:
 		            	
-		            	if (i < 3) /*singlePlayer()*/;
+		            	if (i < 3) worldSelection(renderer);
 		            	else if (i < 5) /*multiPlayer()*/;
 		            	else if (i < 7) /*settings()*/;
 		            	else exit(1);
@@ -102,60 +105,7 @@ int menuScreen(SDL_Renderer *renderer) {
 	}
 }
 
-char* readJson(char *path){
-	int i;
-	FILE *f;
-	f = fopen(path, "r");
-	
-	fseek(f, 0, SEEK_END);
-	int size = ftell(f);
-	if(size <= 10) return NULL;
-	rewind(f);
-	
-	char *jsonText = malloc((size + 1));
-	
-	fread(jsonText, 1, size, f);
-	
-	for(i = 0; i < size; i++){
-		if(jsonText[i] == '}'){
-			i++;
-			break;
-		}
-	}
-	
-	jsonText[i] = '\0';
-	
-	fclose(f);
-	
-	return jsonText;
-}
-
-void collectJson(char *jsonString, worldSave_t *save){
-
-	cJSON *json = cJSON_Parse(jsonString);
-	if(json == NULL){
-		printf("Erro ao analisar JSON.\n");
-		exit(0);
-	}
-	
-	cJSON *character = cJSON_GetObjectItemCaseSensitive(json, "character");
-	cJSON *level = cJSON_GetObjectItemCaseSensitive(json, "level");
-	cJSON *phase = cJSON_GetObjectItemCaseSensitive(json, "phase");
-	
-	strcpy(save->characterStr, character->valuestring);
-	
-	if(!(strcmp("Samurai", character->valuestring))) save->hero.disposition.character = 0; 
-	else if(!(strcmp("Archer", character->valuestring))) save->hero.disposition.character = 1;
-	else save->hero.disposition.character = 2;
-	
-	save->hero.level = level->valueint;
-	
-	save->phase = phase->valueint;
-	
-	cJSON_Delete(json);
-}
-
-int worldSelection(SDL_Renderer *renderer){
+void worldSelection(SDL_Renderer *renderer){
 	tile_t *world;
 	tile_t *slot;
 	tile_t *heroTile;
@@ -299,7 +249,7 @@ int worldSelection(SDL_Renderer *renderer){
 							
 						if(save[i].empty == 1){
 							// chamar a escolha de personagem
-							printf("o save %d esta vazio\n", i);	
+							chooseCharacter(renderer, i+1);	
 						}else{
 							// carregar dados
 							printf("o save %d esta com dados\n", i);
@@ -314,20 +264,27 @@ int worldSelection(SDL_Renderer *renderer){
 		
 		SDL_Delay(16);
 	}
-	
-	return 0;
 }
 
-void singlePlayer (SDL_Renderer *renderer) {
+void chooseCharacter(SDL_Renderer *renderer, int map) {
 	
 	int i = 1;
 	SDL_Event event;
 	tile_t *choices;
 	float time1, time2;
 	int secs, tempSecs = 0;
+	char pathMap[100];
 	FILE *arch;
 	
-	arch = fopen("./maps/Map1/Map1.json", "w");
+	snprintf(pathMap, 99, "./maps/Map%d.json", map);
+	
+	arch = fopen(pathMap, "w");
+	
+	if(!arch) {
+	
+		printf("falha ao abrir arquivo");
+		exit(1);	
+	} 
 	
 	time1 = clock();
 	
@@ -390,21 +347,21 @@ void singlePlayer (SDL_Renderer *renderer) {
 		            	
 		            	if (i < 3) {
 		            		
-		            		fprintf(arch, "{\n\"Phase\": 1,\n\"Health\": 28,\n\"Speed\": 34,\n\"Endurance\": 21,\n\"Damage\": 32,\n\"Xp\": 0,\n\"Level\": 1,\n\"Character\": \"Samurai\"\n}");
+		            		fprintf(arch, "{\n\"phase\": 1,\n\"health\": 28,\n\"speed\": 34,\n\"endurance\": 21,\n\"damage\": 32,\n\"xp\": 0,\n\"level\": 1,\n\"character\": \"Samurai\"\n}");
 		            		fclose(arch);
 							exit(1);	
 						}
 						
 		            	else if (i < 5) {
 		            		
-		            		fprintf(arch, "{\n\"Phase\": 1,\n\"Health\": 15,\n\"Speed\": 26,\n\"Endurance\": 9,\n\"Damage\": 45,\n\"Xp\": 0,\n\"Level\": 1,\n\"Character\": \"Wizard\"\n}");
+		            		fprintf(arch, "{\n\"phase\": 1,\n\"health\": 15,\n\"speed\": 26,\n\"endurance\": 9,\n\"damage\": 45,\n\"xp\": 0,\n\"level\": 1,\n\"character\": \"Wizard\"\n}");
 		            		fclose(arch);
 							exit(1);	
 						}
 						
 		            	else if (i < 7) {
 		            		
-		            		fprintf(arch, "{\n\"Phase\": 1,\n\"Health\": 41,\n\"Speed\": 29,\n\"Endurance\": 12,\n\"Damage\": 25,\n\"Xp\": 0,\n\"Level\": 1,\n\"Character\": \"Archer\"\n}");
+		            		fprintf(arch, "{\n\"phase\": 1,\n\"health\": 41,\n\"speed\": 29,\n\"endurance\": 12,\n\"damage\": 25,\n\"xp\": 0,\n\"level\": 1,\n\"character\": \"Archer\"\n}");
 		            		fclose(arch);
 							exit(1);	
 						}

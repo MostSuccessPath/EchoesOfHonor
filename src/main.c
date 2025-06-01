@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 	
 	initSDL(&window, &renderer);
 
-	worldSelection(renderer);
+	menuScreen(renderer);
 	
 	return 0;
 }
