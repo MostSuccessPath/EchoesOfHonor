@@ -24,6 +24,12 @@ void initSDL(SDL_Window **window, SDL_Renderer **renderer) {
         exit(0);
     }
     
+    if (TTF_Init() < 0) {
+    	
+	    printf("Erro ao inicializar SDL_ttf: %s\n", TTF_GetError());
+		exit(0);
+	}
+    
     if (SDL_GetCurrentDisplayMode(0, &dm) != 0) {
     	
     	printf("Erro ao obter resolução da tela: %s\n", SDL_GetError());
