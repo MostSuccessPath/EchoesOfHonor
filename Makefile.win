@@ -4,8 +4,8 @@
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = src/main.o src/SDLfunctions.o src/selectionScreens.o src/cJSON.o src/cJSON_Utils.o
-LINKOBJ  = src/main.o src/SDLfunctions.o src/selectionScreens.o src/cJSON.o src/cJSON_Utils.o
+OBJ      = src/main.o src/SDLfunctions.o src/selectionScreens.o src/cJSON.o src/cJSON_Utils.o src/actions.o src/readFiles.o src/mapsFunctions.o
+LINKOBJ  = src/main.o src/SDLfunctions.o src/selectionScreens.o src/cJSON.o src/cJSON_Utils.o src/actions.o src/readFiles.o src/mapsFunctions.o
 LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -L"./lib" -static-libgcc -L"./lib" -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"./include" -I"./include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++" -I"./include"
@@ -38,3 +38,12 @@ src/cJSON.o: src/cJSON.c
 
 src/cJSON_Utils.o: src/cJSON_Utils.c
 	$(CC) -c src/cJSON_Utils.c -o src/cJSON_Utils.o $(CFLAGS)
+
+src/actions.o: src/actions.c
+	$(CC) -c src/actions.c -o src/actions.o $(CFLAGS)
+
+src/readFiles.o: src/readFiles.c
+	$(CC) -c src/readFiles.c -o src/readFiles.o $(CFLAGS)
+
+src/mapsFunctions.o: src/mapsFunctions.c
+	$(CC) -c src/mapsFunctions.c -o src/mapsFunctions.o $(CFLAGS)

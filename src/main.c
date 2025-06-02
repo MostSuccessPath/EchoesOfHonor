@@ -4,15 +4,16 @@
 #include <stdlib.h>
 #include "selectionScreens.h"
 #include "SDLfunctions.h"
+#include "structs.h"
 
-int main(int argc, char *argv[]) {
-	
+int main(int argc, char *argv[]){
+	hero_t hero;
 	SDL_Renderer *renderer;
 	SDL_Window *window;
 	
 	initSDL(&window, &renderer);
 
-	worldSelection(renderer);
+	menuScreen(renderer);
 	
 	return 0;
 }

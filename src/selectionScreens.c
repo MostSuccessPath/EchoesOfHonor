@@ -4,14 +4,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 #include "structs.h"
 #include "cJSON.h"
 #include "cJSON_Utils.h"
+#include "selectionScreens.h"
+#include "readFiles.h"
 
 #define NUM_MENUS 9
 #define NUM_CHOICES 7
+#define TILE_SIZE 48
 
-int menuScreen(SDL_Renderer *renderer) {
+void menuScreen(SDL_Renderer *renderer) {
 	
 	int i = 1;
 	SDL_Event event;
@@ -78,7 +82,7 @@ int menuScreen(SDL_Renderer *renderer) {
 		                
 		            case SDLK_RETURN:
 		            	
-		            	if (i < 3) /*singlePlayer()*/;
+		            	if (i < 3) worldSelection(renderer);
 		            	else if (i < 5) /*multiPlayer()*/;
 		            	else if (i < 7) /*settings()*/;
 		            	else exit(1);
@@ -102,60 +106,7 @@ int menuScreen(SDL_Renderer *renderer) {
 	}
 }
 
-char* readJson(char *path){
-	int i;
-	FILE *f;
-	f = fopen(path, "r");
-	
-	fseek(f, 0, SEEK_END);
-	int size = ftell(f);
-	if(size <= 10) return NULL;
-	rewind(f);
-	
-	char *jsonText = malloc((size + 1));
-	
-	fread(jsonText, 1, size, f);
-	
-	for(i = 0; i < size; i++){
-		if(jsonText[i] == '}'){
-			i++;
-			break;
-		}
-	}
-	
-	jsonText[i] = '\0';
-	
-	fclose(f);
-	
-	return jsonText;
-}
-
-void collectJson(char *jsonString, worldSave_t *save){
-
-	cJSON *json = cJSON_Parse(jsonString);
-	if(json == NULL){
-		printf("Erro ao analisar JSON.\n");
-		exit(0);
-	}
-	
-	cJSON *character = cJSON_GetObjectItemCaseSensitive(json, "character");
-	cJSON *level = cJSON_GetObjectItemCaseSensitive(json, "level");
-	cJSON *phase = cJSON_GetObjectItemCaseSensitive(json, "phase");
-	
-	strcpy(save->characterStr, character->valuestring);
-	
-	if(!(strcmp("Samurai", character->valuestring))) save->hero.disposition.character = 0; 
-	else if(!(strcmp("Archer", character->valuestring))) save->hero.disposition.character = 1;
-	else save->hero.disposition.character = 2;
-	
-	save->hero.level = level->valueint;
-	
-	save->phase = phase->valueint;
-	
-	cJSON_Delete(json);
-}
-
-int worldSelection(SDL_Renderer *renderer){
+void worldSelection(SDL_Renderer *renderer){
 	tile_t *world;
 	tile_t *slot;
 	tile_t *heroTile;
@@ -299,10 +250,10 @@ int worldSelection(SDL_Renderer *renderer){
 							
 						if(save[i].empty == 1){
 							// chamar a escolha de personagem
-							printf("o save %d esta vazio\n", i);	
+							chooseCharacter(renderer, i+1, &(save[i]));	
 						}else{
-							// carregar dados
-							printf("o save %d esta com dados\n", i);
+							
+							phase1(renderer, &save->hero);
 						}
 							
 					}
@@ -314,20 +265,26 @@ int worldSelection(SDL_Renderer *renderer){
 		
 		SDL_Delay(16);
 	}
-	
-	return 0;
 }
 
-void singlePlayer (SDL_Renderer *renderer) {
-	
+void chooseCharacter(SDL_Renderer *renderer, int map, worldSave_t *save) {
 	int i = 1;
 	SDL_Event event;
 	tile_t *choices;
 	float time1, time2;
 	int secs, tempSecs = 0;
 	FILE *arch;
+	int select = 0;
 	
-	arch = fopen("./maps/Map1/Map1.json", "w");
+	char mapPath[50];
+	
+	snprintf(mapPath, 49 , "./maps/Map%d.json", map);
+	
+	arch = fopen(mapPath, "w");
+	if(!arch){
+		printf("Erro ao abrir arquivo");
+		exit(1);
+	}
 	
 	time1 = clock();
 	
@@ -390,24 +347,37 @@ void singlePlayer (SDL_Renderer *renderer) {
 		            	
 		            	if (i < 3) {
 		            		
-		            		fprintf(arch, "{\n\"Phase\": 1,\n\"Health\": 28,\n\"Speed\": 34,\n\"Endurance\": 21,\n\"Damage\": 32,\n\"Xp\": 0,\n\"Level\": 1,\n\"Character\": \"Samurai\"\n}");
+		            		fprintf(arch, "{\n\"phase\": 1,\n\"health\": 28,\n\"speed\": 34,\n\"endurance\": 21,\n\"damage\": 32,\n\"xp\": 0,\n\"level\": 1,\n\"character\": \"Samurai\"\n}");
 		            		fclose(arch);
-							exit(1);	
+							select = 1;	
 						}
 						
 		            	else if (i < 5) {
 		            		
-		            		fprintf(arch, "{\n\"Phase\": 1,\n\"Health\": 15,\n\"Speed\": 26,\n\"Endurance\": 9,\n\"Damage\": 45,\n\"Xp\": 0,\n\"Level\": 1,\n\"Character\": \"Wizard\"\n}");
+		            		fprintf(arch, "{\n\"phase\": 1,\n\"health\": 15,\n\"speed\": 26,\n\"endurance\": 9,\n\"damage\": 45,\n\"xp\": 0,\n\"level\": 1,\n\"character\": \"Wizard\"\n}");
 		            		fclose(arch);
-							exit(1);	
+							select = 1;	
 						}
 						
 		            	else if (i < 7) {
 		            		
-		            		fprintf(arch, "{\n\"Phase\": 1,\n\"Health\": 41,\n\"Speed\": 29,\n\"Endurance\": 12,\n\"Damage\": 25,\n\"Xp\": 0,\n\"Level\": 1,\n\"Character\": \"Archer\"\n}");
+		            		fprintf(arch, "{\n\"phase\": 1,\n\"health\": 41,\n\"speed\": 29,\n\"endurance\": 12,\n\"damage\": 25,\n\"xp\": 0,\n\"level\": 1,\n\"character\": \"Archer\"\n}");
 		            		fclose(arch);
-							exit(1);	
+							select = 1;	
 						}
+						
+						if(select == 1){
+							char temp[50];
+		
+							snprintf(temp, 49, "./maps/Map%d.json", map);
+							
+							char *jsonText = readJson(temp);
+							
+							collectJson(jsonText, save);
+							
+							phase1(renderer, save->hero);
+						}
+						
 		            	break;
 		                
 		            default:
@@ -425,4 +395,144 @@ void singlePlayer (SDL_Renderer *renderer) {
 		
 		SDL_Delay(16);
 	}
+}
+
+void readMap(map_t *map, char layersPath[][50]){
+	int i, j, k;
+	
+	map->map = malloc(sizeof(int**) * map->layers);
+	
+	for(i = 0; i < map->layers; i++) map->map[i] = malloc(sizeof(int*) * map->h);
+	
+	for(i = 0; i < map->layers; i++){
+		
+		for(j = 0; j < map->h; j++){
+			
+			map->map[i][j] = malloc(sizeof(int*) * map->w);	
+		}
+	}
+	
+	FILE **f = malloc(sizeof(FILE *) * map->layers);
+	
+	for(i = 0; i < map->layers; i++){
+		f[i] = fopen(layersPath[i], "r");
+		if(!f[i]){
+			printf("Erro ao abrir arquivo!");
+			exit(1);
+		}
+		
+	}
+	
+	for(i = 0; i < map->layers; i++){
+		
+		for(j = 0; j < map->h; j++){
+			
+			for(k = 0; k < map->w; k++){
+				fscanf(f[i], " %d, ", &(map->map[i][j][k]));
+			}
+		}
+	}
+	
+	for(i = 0; i < map->layers; i++) fclose(f[i]);
+}
+
+
+
+void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer, hero_t *hero){
+	int i,j, k = 0;
+	static tile_t *map, *heroTile;
+	static map_t mapPhase1;
+	mapPhase1.w = 234;
+	mapPhase1.h = 248;
+	mapPhase1.layers = 4;
+	static SDL_Rect position, heroRect, heroCut;
+	static SDL_Rect empty = {7 * 64, 4, TILE_SIZE, TILE_SIZE};
+	static oneTime = 0;
+	static SDL_Rect *mapTiles;
+	
+//	int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer
+	if(oneTime == 0){
+		map = loadImage(1, mapPathImage, renderer);
+		defineSize(1, map, 0, 0);
+		
+		mapTiles = malloc(sizeof(SDL_Rect) * numTiles);
+		
+		for(i = 0; i < lines; i++){
+			for(j = 0; j < columns; j++){
+			
+				if(k == numTiles) break;
+			
+				mapTiles[k].x = j * 16;
+				mapTiles[k].y = i * 16;
+				mapTiles[k].w = 16;
+				mapTiles[k].h = 16;
+				k++;
+			}
+			if(k == numTiles) break;
+		}
+		
+		char layers[4][50] = {
+			{"./phases/layers1/piso.txt"},
+			{"./phases/layers1/parede_vertical.txt"},
+			{"./phases/layers1/parede_horizontal.txt"},
+			{"./phases/layers1/decoracoes.txt"},
+		};
+	
+		readMap(&mapPhase1, layers);
+		
+		position.w = TILE_SIZE;
+		position.h = TILE_SIZE;
+		
+		heroRect.w = TILE_SIZE * 1.5;
+		heroRect.h = TILE_SIZE * 1.5;
+		
+		char heroPath[100];
+		
+		if(hero->disposition.character == 0){
+			strcpy(heroPath, "./assets/sprites/samurai/samurai_hero/walk1.png");
+		}
+		
+		heroTile = loadImage(1, heroPath, renderer);
+	
+		
+		oneTime = 1;
+	}
+	
+	SDL_RenderClear(renderer);
+	
+	int camX = (hero->image.x - (map->image.w/2));
+	int camY = (hero->image.y - (map->image.h/2));
+
+	for(i = 0; i < mapPhase1.layers; i++){
+		
+		for(j = 0; j < mapPhase1.h; j++){
+				
+			for(k = 0; k < mapPhase1.w; k++){
+					
+				position.x = ((k * TILE_SIZE) - camX);
+				position.y = ((j * TILE_SIZE) - camY);
+					
+				if(mapPhase1.map[i][j][k] == -1){
+					SDL_RenderCopy(renderer, map->texture, &empty, &position);
+					continue;
+				}
+					
+				SDL_RenderCopy(renderer, map->texture, &mapTiles[mapPhase1.map[i][j][k]], &position);
+				
+			}
+		}
+	}
+	
+	heroRect.x = ((map->image.w/2) - (TILE_SIZE/2));
+	heroRect.y = ((map->image.h/2) - (TILE_SIZE/2));
+	
+	heroCut.x = 32 + (hero->disposition.walking * 128);
+	heroCut.y = 32 + (hero->disposition.orientation * 128);
+	heroCut.w = 64;
+	heroCut.h = 64;
+		
+	SDL_RenderCopy(renderer, heroTile->texture, &heroCut, &heroRect);
+		
+	SDL_RenderPresent(renderer);
+
 }
