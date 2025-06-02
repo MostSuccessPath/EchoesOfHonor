@@ -4,10 +4,10 @@
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = src/main.o src/SDLfunctions.o src/selectionScreens.o src/cJSON.o src/cJSON_Utils.o readFiles.o
-LINKOBJ  = src/main.o src/SDLfunctions.o src/selectionScreens.o src/cJSON.o src/cJSON_Utils.o readFiles.o
-LIBS     = -L"D:/Dev-Cpp/MinGW64/lib" -L"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -L"./lib" -static-libgcc -L"./lib" -lmingw32  -lSDL2main -lSDL2  -lSDL2_image  -lSDL2_ttf
-INCS     = -I"D:/Dev-Cpp/MinGW64/include" -I"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"./include" -I"./include"
+OBJ      = src/main.o src/SDLfunctions.o src/selectionScreens.o src/cJSON.o src/cJSON_Utils.o mapsFunctions.o src/actions.o src/readFiles.o
+LINKOBJ  = src/main.o src/SDLfunctions.o src/selectionScreens.o src/cJSON.o src/cJSON_Utils.o mapsFunctions.o src/actions.o src/readFiles.o
+LIBS     = -L"D:/Dev-Cpp/MinGW64/lib" -L"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -L"./lib" -lmingw32  -lSDL2main -lSDL2  -lSDL2_image  -lSDL2_ttf
+INCS     = -I"D:/Dev-Cpp/MinGW64/include" -I"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"./include"
 CXXINCS  = -I"D:/Dev-Cpp/MinGW64/include" -I"D:/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"D:/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++" -I"./include"
 BIN      = EchoesOfHonor.exe
 CXXFLAGS = $(CXXINCS) 
@@ -39,5 +39,11 @@ src/cJSON.o: src/cJSON.c
 src/cJSON_Utils.o: src/cJSON_Utils.c
 	$(CC) -c src/cJSON_Utils.c -o src/cJSON_Utils.o $(CFLAGS)
 
-readFiles.o: readFiles.c
-	$(CC) -c readFiles.c -o readFiles.o $(CFLAGS)
+mapsFunctions.o: mapsFunctions.c
+	$(CC) -c mapsFunctions.c -o mapsFunctions.o $(CFLAGS)
+
+src/actions.o: src/actions.c
+	$(CC) -c src/actions.c -o src/actions.o $(CFLAGS)
+
+src/readFiles.o: src/readFiles.c
+	$(CC) -c src/readFiles.c -o src/readFiles.o $(CFLAGS)
