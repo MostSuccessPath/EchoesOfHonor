@@ -2,6 +2,7 @@
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "actions.h"
 #include "selectionScreens.h"
 #include "SDLfunctions.h"
 
@@ -12,7 +13,9 @@ int main(int argc, char *argv[]) {
 	
 	initSDL(&window, &renderer);
 
-	menuScreen(renderer);
+//	menuScreen(renderer);
+
+	characterMove(renderer);
 	
 	return 0;
 }
