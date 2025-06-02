@@ -43,6 +43,11 @@ void collectJson(char *jsonString, worldSave_t *save){
 	cJSON *character = cJSON_GetObjectItemCaseSensitive(json, "character");
 	cJSON *level = cJSON_GetObjectItemCaseSensitive(json, "level");
 	cJSON *phase = cJSON_GetObjectItemCaseSensitive(json, "phase");
+	cJSON *health = cJSON_GetObjectItemCaseSensitive(json, "health");
+	cJSON *speed = cJSON_GetObjectItemCaseSensitive(json, "speed");
+	cJSON *endurance = cJSON_GetObjectItemCaseSensitive(json, "endurance");
+	cJSON *damage = cJSON_GetObjectItemCaseSensitive(json, "damage");
+	cJSON *xp = cJSON_GetObjectItemCaseSensitive(json, "xp");
 	
 	strcpy(save->characterStr, character->valuestring);
 	
@@ -51,6 +56,11 @@ void collectJson(char *jsonString, worldSave_t *save){
 	else save->hero.disposition.character = 2;
 	
 	save->hero.level = level->valueint;
+	save->hero.status.health = health->valueint;
+	save->hero.status.speed = speed->valueint;
+	save->hero.status.endurance = endurance->valueint;
+	save->hero.status.damage = damage->valueint;
+	save->hero.xp = xp->valueint;
 	
 	save->phase = phase->valueint;
 	

@@ -1,8 +1,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <pthread.h>
+#include <semaphore.h>
 
 #ifndef STRUCTS_H
 #define STRUCTS_H
+
+pthread_mutex_t heroPositionMutex, eventMutex;
 
 typedef struct {
 	
@@ -70,10 +74,23 @@ typedef struct {
 
 typedef struct {
 	
-	float w;
-	float h;
-	int **map;
+	int w;
+	int h;
+	int layers;
+	int ***map;
 	
 } map_t;
+
+typedef struct{
+	
+	int numTiles;
+	int columns; 
+	int lines;  
+	char *mapPathImage; 
+	SDL_Renderer *renderer;
+	hero_t hero;
+	int event;
+	
+} phase1_t;
 
 #endif

@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include "structs.h"
 #include "cJSON.h"
 #include "cJSON_Utils.h"
@@ -11,6 +13,8 @@
 SDL_DisplayMode dm;
 
 void initSDL(SDL_Window **window, SDL_Renderer **renderer) {
+	
+	pthread_mutex_init(&heroPositionMutex, NULL);
 	
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		

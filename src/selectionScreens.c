@@ -4,17 +4,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "selectionScreens.h"
-#include "readFiles.h"
+#include <math.h>
 #include "structs.h"
-#include "SDLfunctions.h"
 #include "cJSON.h"
 #include "cJSON_Utils.h"
+#include "selectionScreens.h"
+#include "readFiles.h"
 
 #define NUM_MENUS 9
 #define NUM_CHOICES 7
+#define TILE_SIZE 48
 
-int menuScreen(SDL_Renderer *renderer) {
+void menuScreen(SDL_Renderer *renderer) {
 	
 	int i = 1;
 	SDL_Event event;
@@ -249,10 +250,10 @@ void worldSelection(SDL_Renderer *renderer){
 							
 						if(save[i].empty == 1){
 							// chamar a escolha de personagem
-							chooseCharacter(renderer, i+1);	
+							chooseCharacter(renderer, i+1, &(save[i]));	
 						}else{
-							// carregar dados
-							printf("o save %d esta com dados\n", i);
+							
+							phase1(renderer, &save->hero);
 						}
 							
 					}
@@ -266,25 +267,24 @@ void worldSelection(SDL_Renderer *renderer){
 	}
 }
 
-void chooseCharacter(SDL_Renderer *renderer, int map) {
-	
+void chooseCharacter(SDL_Renderer *renderer, int map, worldSave_t *save) {
 	int i = 1;
 	SDL_Event event;
 	tile_t *choices;
 	float time1, time2;
 	int secs, tempSecs = 0;
-	char pathMap[100];
 	FILE *arch;
+	int select = 0;
 	
-	snprintf(pathMap, 99, "./maps/Map%d.json", map);
+	char mapPath[50];
 	
-	arch = fopen(pathMap, "w");
+	snprintf(mapPath, 49 , "./maps/Map%d.json", map);
 	
-	if(!arch) {
-	
-		printf("falha ao abrir arquivo");
-		exit(1);	
-	} 
+	arch = fopen(mapPath, "w");
+	if(!arch){
+		printf("Erro ao abrir arquivo");
+		exit(1);
+	}
 	
 	time1 = clock();
 	
@@ -349,22 +349,35 @@ void chooseCharacter(SDL_Renderer *renderer, int map) {
 		            		
 		            		fprintf(arch, "{\n\"phase\": 1,\n\"health\": 28,\n\"speed\": 34,\n\"endurance\": 21,\n\"damage\": 32,\n\"xp\": 0,\n\"level\": 1,\n\"character\": \"Samurai\"\n}");
 		            		fclose(arch);
-							exit(1);	
+							select = 1;	
 						}
 						
 		            	else if (i < 5) {
 		            		
 		            		fprintf(arch, "{\n\"phase\": 1,\n\"health\": 15,\n\"speed\": 26,\n\"endurance\": 9,\n\"damage\": 45,\n\"xp\": 0,\n\"level\": 1,\n\"character\": \"Wizard\"\n}");
 		            		fclose(arch);
-							exit(1);	
+							select = 1;	
 						}
 						
 		            	else if (i < 7) {
 		            		
 		            		fprintf(arch, "{\n\"phase\": 1,\n\"health\": 41,\n\"speed\": 29,\n\"endurance\": 12,\n\"damage\": 25,\n\"xp\": 0,\n\"level\": 1,\n\"character\": \"Archer\"\n}");
 		            		fclose(arch);
-							exit(1);	
+							select = 1;	
 						}
+						
+						if(select == 1){
+							char temp[50];
+		
+							snprintf(temp, 49, "./maps/Map%d.json", map);
+							
+							char *jsonText = readJson(temp);
+							
+							collectJson(jsonText, save);
+							
+							phase1(renderer, save->hero);
+						}
+						
 		            	break;
 		                
 		            default:
@@ -382,4 +395,144 @@ void chooseCharacter(SDL_Renderer *renderer, int map) {
 		
 		SDL_Delay(16);
 	}
+}
+
+void readMap(map_t *map, char layersPath[][50]){
+	int i, j, k;
+	
+	map->map = malloc(sizeof(int**) * map->layers);
+	
+	for(i = 0; i < map->layers; i++) map->map[i] = malloc(sizeof(int*) * map->h);
+	
+	for(i = 0; i < map->layers; i++){
+		
+		for(j = 0; j < map->h; j++){
+			
+			map->map[i][j] = malloc(sizeof(int*) * map->w);	
+		}
+	}
+	
+	FILE **f = malloc(sizeof(FILE *) * map->layers);
+	
+	for(i = 0; i < map->layers; i++){
+		f[i] = fopen(layersPath[i], "r");
+		if(!f[i]){
+			printf("Erro ao abrir arquivo!");
+			exit(1);
+		}
+		
+	}
+	
+	for(i = 0; i < map->layers; i++){
+		
+		for(j = 0; j < map->h; j++){
+			
+			for(k = 0; k < map->w; k++){
+				fscanf(f[i], " %d, ", &(map->map[i][j][k]));
+			}
+		}
+	}
+	
+	for(i = 0; i < map->layers; i++) fclose(f[i]);
+}
+
+
+
+void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer, hero_t *hero){
+	int i,j, k = 0;
+	static tile_t *map, *heroTile;
+	static map_t mapPhase1;
+	mapPhase1.w = 234;
+	mapPhase1.h = 248;
+	mapPhase1.layers = 4;
+	static SDL_Rect position, heroRect, heroCut;
+	static SDL_Rect empty = {7 * 64, 4, TILE_SIZE, TILE_SIZE};
+	static oneTime = 0;
+	static SDL_Rect *mapTiles;
+	
+//	int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer
+	if(oneTime == 0){
+		map = loadImage(1, mapPathImage, renderer);
+		defineSize(1, map, 0, 0);
+		
+		mapTiles = malloc(sizeof(SDL_Rect) * numTiles);
+		
+		for(i = 0; i < lines; i++){
+			for(j = 0; j < columns; j++){
+			
+				if(k == numTiles) break;
+			
+				mapTiles[k].x = j * 16;
+				mapTiles[k].y = i * 16;
+				mapTiles[k].w = 16;
+				mapTiles[k].h = 16;
+				k++;
+			}
+			if(k == numTiles) break;
+		}
+		
+		char layers[4][50] = {
+			{"./phases/layers1/piso.txt"},
+			{"./phases/layers1/parede_vertical.txt"},
+			{"./phases/layers1/parede_horizontal.txt"},
+			{"./phases/layers1/decoracoes.txt"},
+		};
+	
+		readMap(&mapPhase1, layers);
+		
+		position.w = TILE_SIZE;
+		position.h = TILE_SIZE;
+		
+		heroRect.w = TILE_SIZE * 1.5;
+		heroRect.h = TILE_SIZE * 1.5;
+		
+		char heroPath[100];
+		
+		if(hero->disposition.character == 0){
+			strcpy(heroPath, "./assets/sprites/samurai/samurai_hero/walk1.png");
+		}
+		
+		heroTile = loadImage(1, heroPath, renderer);
+	
+		
+		oneTime = 1;
+	}
+	
+	SDL_RenderClear(renderer);
+	
+	int camX = (hero->image.x - (map->image.w/2));
+	int camY = (hero->image.y - (map->image.h/2));
+
+	for(i = 0; i < mapPhase1.layers; i++){
+		
+		for(j = 0; j < mapPhase1.h; j++){
+				
+			for(k = 0; k < mapPhase1.w; k++){
+					
+				position.x = ((k * TILE_SIZE) - camX);
+				position.y = ((j * TILE_SIZE) - camY);
+					
+				if(mapPhase1.map[i][j][k] == -1){
+					SDL_RenderCopy(renderer, map->texture, &empty, &position);
+					continue;
+				}
+					
+				SDL_RenderCopy(renderer, map->texture, &mapTiles[mapPhase1.map[i][j][k]], &position);
+				
+			}
+		}
+	}
+	
+	heroRect.x = ((map->image.w/2) - (TILE_SIZE/2));
+	heroRect.y = ((map->image.h/2) - (TILE_SIZE/2));
+	
+	heroCut.x = 32 + (hero->disposition.walking * 128);
+	heroCut.y = 32 + (hero->disposition.orientation * 128);
+	heroCut.w = 64;
+	heroCut.h = 64;
+		
+	SDL_RenderCopy(renderer, heroTile->texture, &heroCut, &heroRect);
+		
+	SDL_RenderPresent(renderer);
+
 }

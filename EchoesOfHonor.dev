@@ -11,7 +11,7 @@ ResourceIncludes=
 MakeIncludes=
 Compiler=
 CppCompiler=
-Linker=-lmingw32 _@@_-lSDL2main_@@_-lSDL2_@@_ -lSDL2_image _@@_-lSDL2_ttf_@@_
+Linker=-lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf_@@_
 IsCpp=0
 Icon=
 ExeOutput=
@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0000000000000000000000000
-UnitCount=15
+UnitCount=16
 
 [VersionInfo]
 Major=1
@@ -150,27 +150,17 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
+[Unit17]
+FileName=mapsFunctions.h
+CompileCpp=0
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
 [Unit11]
-FileName=readFiles.c
-CompileCpp=0
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit12]
-FileName=readFiles.h
-CompileCpp=0
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit14]
 FileName=src\actions.c
 CompileCpp=0
 Folder=
@@ -180,8 +170,8 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit15]
-FileName=include\actions.h
+[Unit12]
+FileName=src\readFiles.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -191,7 +181,37 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit13]
-FileName=mapsFunctions.c
+FileName=include\actions.h
+CompileCpp=0
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit14]
+FileName=include\readFiles.h
+CompileCpp=0
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit16]
+FileName=mapsFunctions.h
+CompileCpp=0
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit15]
+FileName=src\mapsFunctions.c
 CompileCpp=0
 Folder=
 Compile=1

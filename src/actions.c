@@ -7,53 +7,68 @@
 #include "actions.h"
 #include "structs.h"
 
-void characterMove(SDL_Renderer *renderer, hero_t *hero) {
+void characterMove(SDL_Renderer *renderer, hero_t *hero, int *canWalk) {
 	
-	Uint32 lastTime = SDL_GetTicks();
+	static float lastTime = 0;
 	SDL_Event event;
+
+	float currentTime = SDL_GetTicks();
+	float deltaTime = (currentTime - lastTime) / 1000.0f;
+	int speed = hero->status.speed * 10;	
+	lastTime = currentTime;
 	
-	while(1) {
-	
-		Uint32 currentTime = SDL_GetTicks();
+	while(SDL_PollEvent(&event)) {
 		
-		float deltaTime = (currentTime - lastTime);
-		
-		lastTime = currentTime;
-		
-		while(SDL_PollEvent(&event)) {
-		
-		    if (event.type == SDL_QUIT) {
+		if (event.type == SDL_QUIT) {
 		    	
-		        exit(0);
+		    exit(0);
 		        
-		    } else if (event.type == SDL_KEYDOWN) {
-		    	
-		        switch (event.key.keysym.sym) {
+		} else if (event.type == SDL_KEYDOWN) {
+		    
+		    int startOrientation = hero->disposition.orientation;
+		    
+		    switch (event.key.keysym.sym) {
 		        	
-		            case SDLK_a:
+		        case SDLK_a:
 		            	
-		            	hero->image.x -= hero->status.speed * deltaTime;
+		           	hero->image.x -= speed * deltaTime;
+		           	hero->disposition.orientation = 1;
 		            	
-		                break;
+		            break;
 		                
-		            case SDLK_d:
+		    	case SDLK_d:
 		            	
-		            	hero->image.x += hero->status.speed * deltaTime;
+		            hero->image.x += speed * deltaTime;
+		            hero->disposition.orientation = 3;
 		            	
-		                break;
+		            break;
 		                
-		            case SDLK_w:
+		        case SDLK_w:
 		            	
-		            	hero->image.y -= hero->status.speed * deltaTime;
+		            hero->image.y -= speed * deltaTime;
+		            hero->disposition.orientation = 0;
+		            
+		            break;
 		            	
-		            	break;
+		        case SDLK_s:
 		            	
-		            case SDLK_s:
+		            hero->image.y += speed * deltaTime;
+		            hero->disposition.orientation = 2;
 		            	
-		            	hero->image.y += hero->status.speed * deltaTime;
-		            	
-		            	break; 	
+		            break; 	
+			}
+			
+			if(*canWalk){
+				if(startOrientation == hero->disposition.orientation){
+				
+					hero->disposition.walking += 1;
+					if(hero->disposition.walking % 9 == 0) hero->disposition.walking = 0;
+				
+				}else{
+					
+					hero->disposition.walking = 0;
 				}
+				*canWalk = 0;
 			}
 		}
 	}
