@@ -50,6 +50,7 @@ typedef struct {
 	disposition_t disposition;
 	int xp;
 	int level;
+	int avaiblePoints;
 	
 } hero_t;
 

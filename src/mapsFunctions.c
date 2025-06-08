@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <semaphore.h>
 #include <time.h>
-#include "selectionScreens.h"
+#include "screens.h"
 #include "actions.h"
 
 void phase1(SDL_Renderer *renderer, hero_t *hero) {
@@ -19,6 +19,8 @@ void phase1(SDL_Renderer *renderer, hero_t *hero) {
 	
 	hero->image.x = 80 * 48;
 	hero->image.y = 230 * 48;
+	
+	hero->disposition.orientation = 0;
 
 	while(1){
 		
@@ -39,7 +41,5 @@ void phase1(SDL_Renderer *renderer, hero_t *hero) {
 		characterMove(renderer, hero, &canWalk);
 		
 		SDL_Delay(16);
-		
 	}	
-	
 }

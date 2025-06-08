@@ -4,11 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 #include <math.h>
 #include "structs.h"
 #include "cJSON.h"
 #include "cJSON_Utils.h"
-#include "selectionScreens.h"
+#include "screens.h"
 #include "readFiles.h"
 
 #define NUM_MENUS 9
@@ -107,6 +108,7 @@ void menuScreen(SDL_Renderer *renderer) {
 }
 
 void worldSelection(SDL_Renderer *renderer){
+	
 	tile_t *world;
 	tile_t *slot;
 	tile_t *heroTile;
@@ -121,7 +123,6 @@ void worldSelection(SDL_Renderer *renderer){
 	defineSize(1, world, 0, 0);
 	
 	heroTile = loadImage(3, "./assets/images/WorldSelection/Hero1.png", renderer);
-	defineSize(3, heroTile, world->image.w, world->image.h);
 	
 	//Criar Slot:
 	
@@ -436,9 +437,8 @@ void readMap(map_t *map, char layersPath[][50]){
 	for(i = 0; i < map->layers; i++) fclose(f[i]);
 }
 
-
-
 void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer, hero_t *hero){
+	
 	int i,j, k = 0;
 	static tile_t *map, *heroTile;
 	static map_t mapPhase1;
@@ -447,10 +447,9 @@ void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Ren
 	mapPhase1.layers = 4;
 	static SDL_Rect position, heroRect, heroCut;
 	static SDL_Rect empty = {7 * 64, 4, TILE_SIZE, TILE_SIZE};
-	static oneTime = 0;
+	static int oneTime = 0;
 	static SDL_Rect *mapTiles;
 	
-//	int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer
 	if(oneTime == 0){
 		map = loadImage(1, mapPathImage, renderer);
 		defineSize(1, map, 0, 0);
@@ -518,7 +517,6 @@ void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Ren
 				}
 					
 				SDL_RenderCopy(renderer, map->texture, &mapTiles[mapPhase1.map[i][j][k]], &position);
-				
 			}
 		}
 	}
@@ -536,3 +534,214 @@ void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Ren
 	SDL_RenderPresent(renderer);
 
 }
+
+void statusScreen(SDL_Renderer *renderer, hero_t *hero) {
+	
+	tile_t *status;
+	tile_t *numbers = malloc(sizeof(tile_t) * 7);
+	tile_t *plus = malloc(sizeof(tile_t) * 4);
+	tile_t *plusHover = malloc(sizeof(tile_t) * 4);
+	tile_t *minus = malloc(sizeof(tile_t) * 4);
+	tile_t *minusHover = malloc(sizeof(tile_t) * 4);
+	tile_t *world = malloc(sizeof(tile_t));
+	static int firstTime = 0;
+	
+	int color[] = {35, 59, 60};
+	int colorHover[] = {255,215,0};
+	int i, mouseX, mouseY, mouseXHover, mouseYHover;
+	
+	/*numbers[0] = Health;
+	  numbers[1] = Damage
+	  numbers[2] = Endurance
+	  numbers[3] = Speed
+	  numbers[4] = Avaible Points
+	  numbers[5] = Level
+	  numbers[6] = XP
+	  */
+	
+	defineSize(1, world, 0, 0);
+	
+	int fontSize = 35 * (1920/world->image.w);
+	
+	char textStatus[10];
+	
+	for(i = 0; i < 7; i++){
+		
+		if(i == 0) snprintf(textStatus, 9, "%.0f", hero->status.health);
+		else if (i == 1) snprintf(textStatus, 9, "%.0f", hero->status.damage);
+		else if (i == 2) snprintf(textStatus, 9, "%.0f", hero->status.endurance);
+		else if (i == 3) snprintf(textStatus, 9, "%.0f", hero->status.speed);
+		else if (i == 4) snprintf(textStatus, 9, "%d", hero->avaiblePoints);
+		else if (i == 5) snprintf(textStatus, 9, "%d", hero->level);
+		else snprintf(textStatus, 9, "%d", hero->xp);
+		
+		createText("./fonts/PressStart2P.ttf", fontSize, color, renderer, textStatus, &(numbers[i]));
+	}
+	
+	char textOperands[2];
+	
+	fontSize = 50;
+	
+	for (i = 0; i < 4; i++) {
+		
+		strcpy(textOperands, "+");
+		
+		createText("./fonts/PressStart2P.ttf", fontSize, color, renderer, textOperands, &(plus[i]));
+		createText("./fonts/PressStart2P.ttf", fontSize, colorHover, renderer, textOperands, &(plusHover[i]));
+		
+		strcpy(textOperands, "-");
+		
+		createText("./fonts/PressStart2P.ttf", fontSize, color, renderer, textOperands, &(minus[i]));
+		createText("./fonts/PressStart2P.ttf", fontSize, colorHover, renderer, textOperands, &(minusHover[i]));
+		
+	}
+	
+	if(hero->status.health < 10) numbers[0].image.x = (world->image.w * 0.6171458333333333);
+	else if (hero->status.health >= 10 && hero->status.health < 100) numbers[0].image.x = (world->image.w * 0.6071458333333333);
+	else numbers[0].image.x = (world->image.w * 0.5971458333333333);
+	numbers[0].image.y = (world->image.h * 0.45999333333333333);
+	
+	if(hero->status.damage < 10) numbers[1].image.x = (world->image.w * 0.6171458333333333);
+	else if (hero->status.damage >= 10 && hero->status.damage < 100) numbers[1].image.x = (world->image.w * 0.6071458333333333);
+	else numbers[1].image.x = (world->image.w * 0.5971458333333333);
+	
+	if(hero->status.endurance < 10) numbers[2].image.x = (world->image.w * 0.6171458333333333);
+	else if (hero->status.endurance >= 10 && hero->status.endurance < 100) numbers[2].image.x = (world->image.w * 0.6071458333333333);
+	else numbers[2].image.x = (world->image.w * 0.5971458333333333);
+	
+	if(hero->status.speed < 10) numbers[3].image.x = (world->image.w * 0.6171458333333333);
+	else if (hero->status.speed >= 10 && hero->status.speed < 100) numbers[3].image.x = (world->image.w * 0.6071458333333333);
+	else numbers[3].image.x = (world->image.w * 0.5971458333333333);
+	
+	SDL_Rect numbersRect[7] = {
+		
+		{numbers[0].image.x, numbers[0].image.y, numbers[0].image.w, numbers[0].image.h},
+		{numbers[1].image.x, world->image.h * 0.5575925925925926, numbers[1].image.w, numbers[1].image.h},
+		{numbers[2].image.x, world->image.h * 0.6525925925925926, numbers[2].image.w, numbers[2].image.h},
+		{numbers[3].image.x, world->image.h * 0.7475000000000000, numbers[3].image.w, numbers[3].image.h},
+		{world->image.w * 0.6552083333333333, world->image.h * 0.8802037037037037, numbers[4].image.w, numbers[4].image.h},
+		{world->image.w * 0.433125, world->image.h * 0.3085185185185185, numbers[5].image.w, numbers[5].image.h},
+		{world->image.w * 0.6775, world->image.h * 0.3135185185185185, numbers[6].image.w, numbers[6].image.h},
+	};
+	
+	plus[0].image.x = (world->image.w * 0.665);
+	plus[0].image.y = (world->image.h * 0.45899333333333333);
+	
+	SDL_Rect plusRect[4] = {
+	
+		{plus[0].image.x, plus[0].image.y, plus[0].image.w, plus[0].image.h},
+		{plus[0].image.x, world->image.h * 0.5537037037037037, plus[0].image.w, plus[0].image.h},
+		{plus[0].image.x, world->image.h * 0.6458333333333333, plus[0].image.w, plus[0].image.h},
+		{plus[0].image.x, world->image.h * 0.7457407407407407, plus[0].image.w, plus[0].image.h},
+	};
+	
+	minus[0].image.x = (world->image.w * 0.5589583333333333);
+	minus[0].image.y = (world->image.h * 0.45899333333333333);
+
+	SDL_Rect minusRect[4] = {
+	
+		{minus[0].image.x, minus[0].image.y, minus[0].image.w, minus[0].image.h},
+		{minus[0].image.x, world->image.h * 0.5537037037037037, minus[0].image.w, minus[0].image.h},
+		{minus[0].image.x, world->image.h * 0.6458333333333333, minus[0].image.w, minus[0].image.h},
+		{minus[0].image.x, world->image.h * 0.7457407407407407, minus[0].image.w, minus[0].image.h},
+	};
+	
+	
+	SDL_Event event;
+
+		SDL_GetMouseState(&mouseXHover, &mouseYHover);
+		
+		SDL_RenderClear(renderer);
+			
+			if (firstTime == 0) status = loadImage(1, "./assets/images/StatusScreen/StatusScreen1.png", renderer);
+ 		
+			SDL_RenderCopy(renderer, status->texture, NULL, NULL);
+			for(i = 0; i < 7; i++) SDL_RenderCopy(renderer, numbers[i].texture, NULL, &numbersRect[i]);
+			
+			for(i = 0; i < 4; i++){
+			
+				if ((plusRect[i].x <= mouseXHover) && ((plusRect[i].x + plusRect[i].w) > mouseXHover) &&
+				(plusRect[i].y <= mouseYHover) && ((plusRect[i].y + plusRect[i].h) > mouseYHover))
+				SDL_RenderCopy(renderer, plusHover->texture, NULL, &plusRect[i]);
+				else SDL_RenderCopy(renderer, plus[i].texture, NULL, &plusRect[i]);
+				
+				if ((minusRect[i].x <= mouseXHover) && ((minusRect[i].x + minusRect[i].w) > mouseXHover) &&
+				(minusRect[i].y <= mouseYHover) && ((minusRect[i].y + minusRect[i].h) > mouseYHover)) 
+				SDL_RenderCopy(renderer, minusHover->texture, NULL, &minusRect[i]);
+				else SDL_RenderCopy(renderer, minus[i].texture, NULL, &minusRect[i]);
+			} 
+		
+		SDL_RenderPresent(renderer);
+		
+		while(SDL_PollEvent(&event)){
+			
+			if(event.type == SDL_QUIT){
+				exit(1);
+			}else if(event.type == SDL_MOUSEBUTTONDOWN){
+				
+				mouseX = event.button.x;
+				mouseY = event.button.y;
+				
+				for(i = 0; i < 4; i++){
+				
+					if ((plusRect[i].x <= mouseX) && ((plusRect[i].x + plusRect[i].w) > mouseX) &&
+					(plusRect[i].y <= mouseY) && ((plusRect[i].y + plusRect[i].h) > mouseY)) {
+						
+						if (hero->avaiblePoints == 0) continue;
+						
+						if(i == 0 && hero->status.health < 100) {
+							
+							hero->status.health += 1;
+							hero->avaiblePoints -= 1;
+						} 
+						else if (i == 1 && hero->status.damage < 100) {
+							
+							hero->status.damage += 1;
+							hero->avaiblePoints -= 1;
+						} 
+						else if (i == 2 && hero->status.endurance < 100) {
+							
+							hero->status.endurance += 1;
+							hero->avaiblePoints -= 1;
+						} 
+						else if (i == 3 && hero->status.speed < 100) {
+							
+							hero->status.speed += 1;
+							hero->avaiblePoints -= 1;
+						} 
+					}
+					
+					
+					if ((minusRect[i].x <= mouseX) && ((minusRect[i].x + minusRect[i].w) > mouseX) &&
+					(minusRect[i].y <= mouseY) && ((minusRect[i].y + minusRect[i].h) > mouseY)) {
+						
+						
+						if(i == 0 && hero->status.health > 0) {
+							
+							hero->status.health -= 1;
+							hero->avaiblePoints += 1;
+						} 
+						else if (i == 1 && hero->status.damage > 0) {
+							
+							hero->status.damage -= 1;
+							hero->avaiblePoints += 1;
+						} 
+						
+						else if (i == 2 && hero->status.endurance > 0) {
+							
+							hero->status.endurance -= 1;
+							hero->avaiblePoints += 1;
+						}  
+						else if (i == 3 && hero->status.speed > 0) {
+							
+							hero->status.speed -= 1;
+							hero->avaiblePoints += 1;
+						} 
+					}
+				} 
+			}
+		}
+		
+		firstTime = 1;
+		SDL_Delay(16); 
+}	
