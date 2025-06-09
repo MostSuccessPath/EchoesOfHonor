@@ -15,6 +15,6 @@ void collectJson(char *jsonString, worldSave_t *save);
 
 void worldSelection(SDL_Renderer *renderer);
 
-void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer, hero_t *hero);
+void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer, hero_t *hero, spawn_t *spawns, int spawnsCount, char *enemyPath);
 
 #endif

@@ -14,19 +14,22 @@ void phase1(SDL_Renderer *renderer, hero_t *hero) {
 	float time1, time2;
 	int secs, tempSecs = 0;
 	int canWalk = 1;
-	
+	spawn_t *spawns;
+	int i;
 	time1 = clock();
 	
 	hero->image.x = 80 * 48;
 	hero->image.y = 230 * 48;
 
+	spawnEnemys(6, &spawns);
+	
 	while(1){
 		
 		time2 = clock();
 		
 		secs = (((time2 - time1)/CLOCKS_PER_SEC)*10);
 		
-		printMap(29, 8, 4, "./phases/Phase1.png", renderer, hero);
+		printMap(35, 8, 5, "./phases/Phase1.png", renderer, hero, spawns, 6, "./assets/sprites/wizard/wizard_enemy/walk1.png");
 		
 		if (tempSecs != secs && canWalk != 1){
 			
@@ -34,12 +37,12 @@ void phase1(SDL_Renderer *renderer, hero_t *hero) {
 			canWalk = 1;
 		}
 		
+		activeSpawns(spawns, 6, hero);
+		
 		if((secs - 1.1) > tempSecs) hero->disposition.walking = 0;
 		
 		characterMove(renderer, hero, &canWalk);
 		
 		SDL_Delay(16);
-		
 	}	
-	
 }

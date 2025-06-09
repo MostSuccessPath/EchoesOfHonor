@@ -13,7 +13,6 @@
 
 #define NUM_MENUS 9
 #define NUM_CHOICES 7
-#define TILE_SIZE 48
 
 void menuScreen(SDL_Renderer *renderer) {
 	
@@ -438,7 +437,7 @@ void readMap(map_t *map, char layersPath[][50]){
 
 
 
-void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer, hero_t *hero){
+void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer, hero_t *hero, spawn_t *spawns, int spawnsCount, char *enemyPath){
 	int i,j, k = 0;
 	static tile_t *map, *heroTile;
 	static map_t mapPhase1;
@@ -446,12 +445,15 @@ void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Ren
 	mapPhase1.h = 248;
 	mapPhase1.layers = 4;
 	static SDL_Rect position, heroRect, heroCut;
-	static SDL_Rect empty = {7 * 64, 4, TILE_SIZE, TILE_SIZE};
-	static oneTime = 0;
+	static SDL_Rect empty = {7 * 64, 5, TILE_SIZE, TILE_SIZE};
+	static int oneTime = 0;
 	static SDL_Rect *mapTiles;
+	static tile_t *enemiesTexture;
+	
 	
 //	int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer
 	if(oneTime == 0){
+		printf("teste");
 		map = loadImage(1, mapPathImage, renderer);
 		defineSize(1, map, 0, 0);
 		
@@ -496,6 +498,8 @@ void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Ren
 	
 		
 		oneTime = 1;
+		
+		enemiesTexture = loadImage(4, enemyPath, renderer);
 	}
 	
 	SDL_RenderClear(renderer);
@@ -523,9 +527,45 @@ void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Ren
 		}
 	}
 	
+	SDL_Rect enemy;
+	SDL_Rect enemyCut;
+	enemyCut.w = 64;
+	enemyCut.h = 64;
+	
+	for(i = 0; i < spawnsCount; i++){
+		for(j = 0; j < spawns[i].enemiesCount; j++){
+			
+			enemy.x =  spawns[i].enemies[j].image.x - camX;
+			enemy.y = spawns[i].enemies[j].image.y - camY;
+			enemy.w = 64;
+			enemy.h = 64;
+			
+			enemyCut.x = (spawns[i].enemies[j].disposition.walking * 64);
+			enemyCut.y = (spawns[i].enemies[j].disposition.orientation * 64);
+			
+			SDL_RenderCopy(renderer, enemiesTexture[spawns[i].enemies[j].disposition.character].texture , &enemyCut, &enemy);
+		}
+	}
+	
+	SDL_Rect barrier;
+	barrier.w = TILE_SIZE;
+	barrier.h = TILE_SIZE;
+	
+	for(i = 0; i < spawnsCount; i++){
+		if(spawns[i].activated == 0) continue;
+		
+		for(j = 0; j < spawns[i].barriersCount; j++){
+			
+			barrier.x = spawns[i].barrier[j].x - camX;
+			barrier.y = spawns[i].barrier[j].y - camY;
+			
+			SDL_RenderCopy(renderer, map->texture, &mapTiles[1], &barrier);
+		}
+	}
+	
 	heroRect.x = ((map->image.w/2) - (TILE_SIZE/2));
 	heroRect.y = ((map->image.h/2) - (TILE_SIZE/2));
-	
+
 	heroCut.x = 32 + (hero->disposition.walking * 128);
 	heroCut.y = 32 + (hero->disposition.orientation * 128);
 	heroCut.w = 64;

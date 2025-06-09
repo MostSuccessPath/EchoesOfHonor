@@ -2,6 +2,7 @@
 #include <SDL2/SDL_image.h>
 #include <pthread.h>
 #include <semaphore.h>
+#define TILE_SIZE 48
 
 #ifndef STRUCTS_H
 #define STRUCTS_H
@@ -69,7 +70,7 @@ typedef struct {
 	disposition_t disposition;
 	int xp_drop;
 	int iten_drop;
-	
+		
 } enemy_t;
 
 typedef struct {
@@ -92,5 +93,16 @@ typedef struct{
 	int event;
 	
 } phase1_t;
+
+typedef struct{
+	int vectH;
+	int vectW;
+	enemy_t *enemies;
+	int activated;
+	int enemiesCount;
+	image_t *barrier;
+	int barriersCount;
+	
+} spawn_t;
 
 #endif
