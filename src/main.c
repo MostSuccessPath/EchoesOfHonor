@@ -2,7 +2,7 @@
 #include <SDL2/SDL_image.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "selectionScreens.h"
+#include "screens.h"
 #include "SDLfunctions.h"
 #include "structs.h"
 

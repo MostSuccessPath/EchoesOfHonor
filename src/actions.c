@@ -7,70 +7,61 @@
 #include "actions.h"
 #include "structs.h"
 
-void characterMove(SDL_Renderer *renderer, hero_t *hero, int *canWalk) {
-	
+void characterMove(SDL_Renderer *renderer, hero_t *hero, int *canWalk, int *activated, SDL_Keycode event) {
 	static float lastTime = 0;
-	SDL_Event event;
-
 	float currentTime = SDL_GetTicks();
 	float deltaTime = (currentTime - lastTime) / 1000.0f;
 	int speed = hero->status.speed * 100;	
 	lastTime = currentTime;
 	
-	while(SDL_PollEvent(&event)) {
-		
-		if (event.type == SDL_QUIT) {
-		    	
-		    exit(0);
-		        
-		} else if (event.type == SDL_KEYDOWN) {
-		    
-		    int startOrientation = hero->disposition.orientation;
-		    
-		    switch (event.key.keysym.sym) {
+	if(event == 0) return;
+	
+	int startOrientation = hero->disposition.orientation;
+	
+	printf("%.2f\n", deltaTime);
+	
+	switch (event) {
 		        	
-		        case SDLK_a:
+		case SDLK_a:
 		            	
-		           	hero->image.x -= speed * deltaTime;
-		           	hero->disposition.orientation = 1;
+		    hero->image.x -= speed * deltaTime;
+		    hero->disposition.orientation = 1;
 		            	
-		            break;
+		    break;
 		                
-		    	case SDLK_d:
+		case SDLK_d:
 		            	
-		            hero->image.x += speed * deltaTime;
-		            hero->disposition.orientation = 3;
+		    hero->image.x += speed * deltaTime;
+		    hero->disposition.orientation = 3;
 		            	
-		            break;
+		    break;
 		                
-		        case SDLK_w:
+		case SDLK_w:
 		            	
-		            hero->image.y -= speed * deltaTime;
-		            hero->disposition.orientation = 0;
+		    hero->image.y -= speed * deltaTime;
+		    hero->disposition.orientation = 0;
 		            
-		            break;
+		    break;
 		            	
-		        case SDLK_s:
+		case SDLK_s:
 		            	
-		            hero->image.y += speed * deltaTime;
-		            hero->disposition.orientation = 2;
+		    hero->image.y += speed * deltaTime;
+		    hero->disposition.orientation = 2;
 		            	
-		            break; 	
-			}
+		    break;
+	}
 			
-			if(*canWalk){
-				if(startOrientation == hero->disposition.orientation){
-				
-					hero->disposition.walking += 1;
-					if(hero->disposition.walking % 9 == 0) hero->disposition.walking = 0;
-				
-				}else{
+	if(*canWalk){
+		if(startOrientation == hero->disposition.orientation){
 					
-					hero->disposition.walking = 0;
-				}
-				*canWalk = 0;
-			}
+			hero->disposition.walking += 1;
+			if(hero->disposition.walking % 9 == 0) hero->disposition.walking = 0;
+					
+		}else{
+						
+			hero->disposition.walking = 0;
 		}
+		*canWalk = 0;
 	}
 }
 

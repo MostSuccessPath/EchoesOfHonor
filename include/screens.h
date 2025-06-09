@@ -2,8 +2,8 @@
 #include <SDL2/SDL_image.h>
 #include "structs.h"
 
-#ifndef SELECTIONSCREENS
-#define SELECTIONSCREENS
+#ifndef SCREENS_H
+#define SCREENS_H
 
 void menuScreen(SDL_Renderer *renderer);
 
@@ -16,5 +16,7 @@ void collectJson(char *jsonString, worldSave_t *save);
 void worldSelection(SDL_Renderer *renderer);
 
 void printMap(int numTiles, int columns, int lines,  char *mapPathImage, SDL_Renderer *renderer, hero_t *hero, spawn_t *spawns, int spawnsCount, char *enemyPath);
+
+void statusScreen(SDL_Renderer *renderer, hero_t *hero, SDL_Event event);
 
 #endif
