@@ -28,7 +28,7 @@ void menuScreen(SDL_Renderer *renderer) {
 	
 	char path[100] = "./assets/images/Menus/Menu .png";
 	
-	menus = loadImage(NUM_MENUS, path, renderer);
+	menus = (void*)loadImage(NUM_MENUS, path, renderer);
 	
 	defineSize(NUM_MENUS, menus, 0, 0);
 	
